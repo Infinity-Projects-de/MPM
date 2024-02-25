@@ -1,0 +1,7 @@
+{
+  "pack": {
+    "pack_format": 18,
+	"supported_formats": {"min_inclusive": 16, "max_inclusive": 24},
+    "description": "§aMPM Resource Pack\n§a§lBy ChechuDEV"
+  }
+}
