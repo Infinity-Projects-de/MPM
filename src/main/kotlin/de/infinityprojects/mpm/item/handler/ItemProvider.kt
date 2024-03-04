@@ -1,8 +1,8 @@
-package de.infinityprojects.mpm.providers
+package de.infinityprojects.mpm.item
 
 import de.infinityprojects.mpm.api.Manager
-import de.infinityprojects.mpm.item.Item
 import de.infinityprojects.mpm.item.data.ItemData
+import de.infinityprojects.mpm.providers.RegistryProvider
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
@@ -19,9 +19,14 @@ class ItemProvider private constructor(
     val id: NamespacedKey,
     val data: ItemData?,
     val displayName: Component,
-    val desc: List<Component>,
-    var model: Int = 0,
+    val desc: List<Component>, // This is for original lore, overridable with mutable data
+    val model: Int = 0,
 ): Item {
+    val plugin = id.namespace()
+    override fun getPluginName(): String {
+        return plugin;
+    }
+
     override fun getItem(): ItemStack {
         val item = ItemStack(Material.STONE)
         val meta = item.itemMeta ?: Bukkit.getItemFactory().getItemMeta(Material.STONE)
@@ -52,7 +57,7 @@ class ItemProvider private constructor(
            lore
         )
         meta.persistentDataContainer.set(id, PersistentDataType.STRING, "mpm")
-        //meta.setCustomModelData(model)
+
         item.itemMeta = meta
         return item
     }
@@ -67,7 +72,7 @@ class ItemProvider private constructor(
         private val yaml: Yaml = Yaml()
         private var tempTranslations: Map<String, String> = mapOf()
 
-        fun createItem(plugin: Plugin, id: String, data: ItemData?): Item {
+        internal fun createItem(plugin: Plugin, id: String, data: ItemData?): Item {
             val model = (Manager.getManager().getItemRegistry() as RegistryProvider).dispatchID()
 
             if (tempTranslations.isEmpty()) {

@@ -1,17 +1,15 @@
 package de.infinityprojects.mpm.item
 
 import de.infinityprojects.mpm.api.Manager
+import de.infinityprojects.mpm.item.mutable.MPMItem
 import de.infinityprojects.mpm.packet.PacketEvent
 import de.infinityprojects.mpm.packet.PacketListener
-import de.infinityprojects.mpm.providers.ItemProvider
 import net.minecraft.core.NonNullList
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.world.item.ItemStack
-import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Material
-import org.bukkit.persistence.PersistentDataType
 
 class ItemHandler {
     @PacketListener
@@ -45,24 +43,19 @@ class ItemHandler {
 
     private fun getRealItem(item: ItemStack): ItemStack {
         val bukkitItem = item.asBukkitMirror()
-        if (!bukkitItem.hasItemMeta()) return item
-        val meta = bukkitItem.itemMeta
-        meta.persistentDataContainer.keys.forEach {
-            if (meta.persistentDataContainer.get(it, PersistentDataType.STRING) == "mpm") {
-                val plugin = Bukkit.getPluginManager().getPlugin(it.namespace()) ?: throw Exception("Plugin not found")
-                val reg = Manager.getManager().getItemRegistry()
-                val mpmItem = reg.get(it) as ItemProvider
-                val mItem = org.bukkit.inventory.ItemStack(Material.STONE)
-                val mMeta = mItem.itemMeta
-                mMeta.displayName(mpmItem.displayName)
-                mMeta.lore(mpmItem.desc)
-                mMeta.setCustomModelData(mpmItem.model)
+        val mutableItem = MutableItem.fromItemStack(bukkitItem)
+        if (mutableItem is MPMItem) {
+            val realItem = org.bukkit.inventory.ItemStack(Material.STONE)
+            val meta = realItem.itemMeta
+            meta.displayName(mutableItem.getDisplayName())
+            meta.lore(mutableItem.getDescription())
+            meta.setCustomModelData((mutableItem.item as ItemProvider).model)
 
-                mItem.itemMeta = mMeta
-                mItem.amount = bukkitItem.amount
-                return ItemStack.fromBukkitCopy(mItem)
-            }
+            realItem.itemMeta = meta
+            realItem.amount = bukkitItem.amount
+            return ItemStack.fromBukkitCopy(realItem)
+        } else {
+            return item
         }
-        return item
     }
 }
