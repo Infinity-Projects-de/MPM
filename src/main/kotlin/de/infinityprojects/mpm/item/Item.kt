@@ -2,7 +2,7 @@ package de.infinityprojects.mpm.item
 
 import de.infinityprojects.mpm.api.Manager
 import de.infinityprojects.mpm.item.data.ItemData
-import de.infinityprojects.mpm.providers.ItemProvider
+import de.infinityprojects.mpm.item.handler.ItemProvider
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 
@@ -20,13 +20,28 @@ interface Item {
      */
     fun getItem(amount: Int): ItemStack
 
+    fun getItemData(): ItemData
+
+    /**
+     * Gives the plugin name of the item
+     * @return the plugin name
+     */
+    fun getPluginName(): String
+
     companion object {
-        fun registerItem(plugin: Plugin, id: String, data: ItemData?) {
+        fun registerItem(
+            plugin: Plugin,
+            id: String,
+            data: ItemData?,
+        ) {
             val item = ItemProvider.createItem(plugin, id, data)
             Manager.getManager().getItemRegistry().register(plugin, id, item)
         }
 
-        fun registerItems(plugin: Plugin, items: Map<String, ItemData?>) {
+        fun registerItems(
+            plugin: Plugin,
+            items: Map<String, ItemData?>,
+        ) {
             items.forEach { (id, data) ->
                 registerItem(plugin, id, data)
             }
