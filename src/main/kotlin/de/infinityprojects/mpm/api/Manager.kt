@@ -1,5 +1,6 @@
 package de.infinityprojects.mpm.api
 
+import de.infinityprojects.mpm.block.Block
 import de.infinityprojects.mpm.item.Item
 import org.bukkit.Bukkit
 
@@ -7,6 +8,8 @@ interface Manager {
     fun <T> getRegistry(t: Class<T>): Registry<T>
 
     fun getItemRegistry(): Registry<Item>
+
+    fun getBlockRegistry(): Registry<Block>
 
     companion object {
         private lateinit var manager: Manager
