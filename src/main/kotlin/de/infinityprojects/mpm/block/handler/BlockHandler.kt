@@ -1,40 +1,70 @@
-package de.infinityprojects.mpm.block
+package de.infinityprojects.mpm.block.handler
 
+import de.infinityprojects.mpm.Main
 import de.infinityprojects.mpm.api.Manager
+import de.infinityprojects.mpm.block.storage.Position
+import de.infinityprojects.mpm.block.storage.Region
 import de.infinityprojects.mpm.packet.PacketEvent
 import de.infinityprojects.mpm.packet.PacketListener
-import net.minecraft.core.BlockPos
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket
-import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket
+import org.bukkit.Bukkit
+import org.bukkit.GameMode
+import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.World
-import org.bukkit.block.Barrel
-import org.bukkit.persistence.PersistentDataType
+import org.bukkit.craftbukkit.v1_20_R3.block.data.CraftBlockData
 
-class BlockHandler {
+class BlockHandler(val mpm: Main) {
+    val reg = Manager.getManager().getBlockRegistry()
+
     @PacketListener
     fun blockSetPacket(e: PacketEvent<ClientboundBlockUpdatePacket>) {
         val p = e.packet
+        val player = e.player
+        val pos = p.pos
 
-        val block = getRealBlock(p.pos, e.player.world, p.blockState)
-        if (block != p.blockState) {
-            e.packet = ClientboundBlockUpdatePacket(p.pos, block)
+        val block = Region.getBlockAt(player.world, Position(pos.x, pos.y, pos.z))
+
+        if (block != null && block is BlockProvider) {
+            val loc = Location(player.world, pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble())
+
+            val state = (block.model.blockData as CraftBlockData).state
+
+            e.packet = ClientboundBlockUpdatePacket(pos, state)
         }
     }
 
-    private fun getRealBlock(pos: BlockPos, world: World, original: BlockState): BlockState {
-        val block = world.getBlockAt(pos.x, pos.y, pos.z)
-        if (block is Barrel) {
-            val tags = block.persistentDataContainer
-            tags.keys.forEach {
-                val value = tags.get(it, PersistentDataType.STRING)
-                if (value == "mpm-block") {
-                    val mBlock = Manager.getManager().getBlockRegistry().get(it)
-                    mBlock as BlockProvider
-                    
-                    return mBlock.model.blockState;
-                }
-            }
+    fun destroyBlock(
+        world: World,
+        pos: Position,
+        drop: Boolean,
+    ) {
+        Bukkit.getScheduler().runTask(mpm) { _ ->
+            val loc = world.getBlockAt(pos.x, pos.y, pos.z).location
+            loc.block.type = Material.AIR
         }
-        return original
+        if (drop) {
+            // drop item
+        }
+        Region.setBlockAt(world, pos, null)
+    }
+
+    @PacketListener
+    fun onStartBreak(e: PacketEvent<ServerboundPlayerActionPacket>) {
+        val p = e.packet
+        val pos = p.pos
+        val player = e.player
+        if (p.action == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK) {
+            if (player.gameMode == GameMode.CREATIVE) {
+                destroyBlock(player.world, Position(pos.x, pos.y, pos.z), false)
+            } else {
+                // increment status every x ticks calc
+            }
+        } else if (p.action == ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK) {
+            // remove from destruction and send 0 status
+        } else {
+            return
+        }
     }
 }
