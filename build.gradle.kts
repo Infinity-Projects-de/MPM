@@ -24,7 +24,7 @@ bukkit {
         listOf(
             "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0",
             "org.jetbrains.kotlin:kotlin-reflect:1.9.22",
-            "org.reflections:reflections:0.10.2"
+            "org.reflections:reflections:0.10.2",
         )
 
     commands {
