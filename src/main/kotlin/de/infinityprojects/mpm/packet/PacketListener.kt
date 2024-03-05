@@ -21,5 +21,5 @@ annotation class PacketListener(
      * @return the priority
      */
     val priority: EventPriority = EventPriority.NORMAL,
-    val ignoreCancelled: Boolean = false
+    val ignoreCancelled: Boolean = false,
 )

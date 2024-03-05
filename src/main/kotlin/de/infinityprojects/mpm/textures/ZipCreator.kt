@@ -1,5 +1,6 @@
 package de.infinityprojects.mpm.textures
 
+import com.google.gson.JsonObject
 import de.infinityprojects.mpm.Main
 import org.bukkit.plugin.Plugin
 import java.io.ByteArrayOutputStream
@@ -12,9 +13,8 @@ import java.security.MessageDigest
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
-
 class ZipCreator(
-    val mpm: Plugin
+    val mpm: Plugin,
 ) : Closeable {
     private val out = ByteArrayOutputStream()
     private val zip: ZipOutputStream = ZipOutputStream(out)
@@ -29,28 +29,50 @@ class ZipCreator(
         zip.setComment("MPM Texture Pack")
     }
 
-    fun addFile(file: File, path: String) {
+    fun addFile(
+        file: File,
+        path: String,
+    ) {
         val e = ZipEntry(path)
         zip.putNextEntry(e)
         Files.copy(file.toPath(), zip)
         zip.closeEntry()
     }
 
-    fun writeData(file: ByteArrayOutputStream, path: String) {
+    fun writeData(
+        file: ByteArrayOutputStream,
+        path: String,
+    ) {
         val e = ZipEntry(path)
         zip.putNextEntry(e)
         file.writeTo(zip)
         zip.closeEntry()
     }
 
-    fun writeData(file: ByteArray, path: String) {
+    fun writeData(
+        file: ByteArray,
+        path: String,
+    ) {
         val e = ZipEntry(path)
         zip.putNextEntry(e)
         zip.write(file)
         zip.closeEntry()
     }
 
-    fun writeStream(file: InputStream, path: String) {
+    fun writeData(
+        json: JsonObject,
+        path: String,
+    ) {
+        val e = ZipEntry(path)
+        zip.putNextEntry(e)
+        zip.write(json.toString().toByteArray())
+        zip.closeEntry()
+    }
+
+    fun writeStream(
+        file: InputStream,
+        path: String,
+    ) {
         val e = ZipEntry(path)
         zip.putNextEntry(e)
         file.copyTo(zip)
@@ -67,14 +89,11 @@ class ZipCreator(
         val buffer = ByteArray(1024)
         while (digestStream.read(buffer) > 0);
         val sha1 = digest.digest()
-        val sha1string = sha1.joinToString("") {
-            String.format("%02x", it)
-        }
+        val sha1string =
+            sha1.joinToString("") {
+                String.format("%02x", it)
+            }
         digestStream.close()
-        println(sha1string)
-        println(sha1string.length)
-        println(sha1)
-        println(sha1.size)
         return sha1string
     }
 
@@ -85,6 +104,4 @@ class ZipCreator(
         Files.write(mpm.dataFolder.resolve("textures.zip").toPath(), out.toByteArray())
         out.close()
     }
-
-
 }

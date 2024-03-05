@@ -21,7 +21,6 @@ import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.jvm.javaType
 
 object PacketHandler : Listener {
-
     val PACKET_PREFIX = "mpm"
 
     // Bukkit event handlers
@@ -45,7 +44,9 @@ object PacketHandler : Listener {
             listener::class.functions.mapNotNull { function ->
                 function.findAnnotation<PacketListener>()?.let { packetListener ->
                     if (function.parameters.size != 2) {
-                        throw IllegalArgumentException("@PacketListener annotation must be applied to a function with exactly one parameter")
+                        throw IllegalArgumentException(
+                            "@PacketListener annotation must be applied to a function with exactly one parameter",
+                        )
                     }
 
                     val parameter = function.parameters[1]
@@ -53,7 +54,9 @@ object PacketHandler : Listener {
                     val classifier = parameterType.classifier as? KClass<*>
 
                     if (classifier == null || !classifier.isSubclassOf(PacketEvent::class)) {
-                        throw IllegalArgumentException("@PacketListener annotation must be applied to a function with a PacketEvent<T> parameter")
+                        throw IllegalArgumentException(
+                            "@PacketListener annotation must be applied to a function with a PacketEvent<T> parameter",
+                        )
                     }
 
                     val javaType = parameterType.javaType
@@ -62,20 +65,27 @@ object PacketHandler : Listener {
                         if (typeArgument is Class<*>) {
                             return@mapNotNull Listener(typeArgument.kotlin, function, listener, packetListener)
                         } else {
-                            throw IllegalArgumentException("PacketEvent<T> parameter must have a valid T. T must implement the interface Packet<*>.")
+                            throw IllegalArgumentException(
+                                "PacketEvent<T> parameter must have a valid T. T must implement the interface Packet<*>.",
+                            )
                         }
                     } else {
-                        throw IllegalArgumentException("PacketEvent parameter must be a PacketEvent<T>, technically called a ParametrizedType")
+                        throw IllegalArgumentException(
+                            "PacketEvent parameter must be a PacketEvent<T>, technically called a ParametrizedType",
+                        )
                     }
                 }
                 return@mapNotNull null
-            }
+            },
         )
     }
 
     // Player packet sending
 
-    fun sendPacket(player: Player, packet: Packet<*>) {
+    fun sendPacket(
+        player: Player,
+        packet: Packet<*>,
+    ) {
         (player as CraftPlayer).handle.connection.send(packet)
     }
 
@@ -86,28 +96,35 @@ object PacketHandler : Listener {
      * @param player The player to be injected with
      */
     private fun injectPlayer(player: Player) {
-        val channelDuplexHandler: ChannelDuplexHandler = object : ChannelDuplexHandler() {
-            override fun channelRead(ctx: ChannelHandlerContext, msg: Any) {
-                val e = handlePacket(msg, player)
-                if (e == null) {
-                    super.channelRead(ctx, msg)
-                } else if (!e.cancelled) {
-                    super.channelRead(ctx, e.packet)
-                }
-            }
-
-            override fun write(ctx: ChannelHandlerContext?, msg: Any?, promise: ChannelPromise?) {
-                if (msg != null) {
+        val channelDuplexHandler: ChannelDuplexHandler =
+            object : ChannelDuplexHandler() {
+                override fun channelRead(
+                    ctx: ChannelHandlerContext,
+                    msg: Any,
+                ) {
                     val e = handlePacket(msg, player)
                     if (e == null) {
-                        super.write(ctx, msg, promise)
-                    } else if(!e.cancelled) {
-                        super.write(ctx, e.packet, promise)
+                        super.channelRead(ctx, msg)
+                    } else if (!e.cancelled) {
+                        super.channelRead(ctx, e.packet)
                     }
                 }
 
+                override fun write(
+                    ctx: ChannelHandlerContext?,
+                    msg: Any?,
+                    promise: ChannelPromise?,
+                ) {
+                    if (msg != null) {
+                        val e = handlePacket(msg, player)
+                        if (e == null) {
+                            super.write(ctx, msg, promise)
+                        } else if (!e.cancelled) {
+                            super.write(ctx, e.packet, promise)
+                        }
+                    }
+                }
             }
-        }
 
         val pipeline = (player as CraftPlayer).handle.connection.connection.channel.pipeline()
         pipeline.addBefore("packet_handler", "$PACKET_PREFIX:${player.name}", channelDuplexHandler)
@@ -130,7 +147,10 @@ object PacketHandler : Listener {
      * @param packet The packet to be sent
      * @return Whether the packet should continue or not (false = cancelled)
      */
-    private fun handlePacket(packet: Any, player: Player): PacketEvent<*>? {
+    private fun handlePacket(
+        packet: Any,
+        player: Player,
+    ): PacketEvent<*>? {
         if (packet is Packet<*>) {
             val packetEvent = PacketEvent(packet, player)
             listeners.sortedByDescending { it.packetListener.priority.ordinal }
@@ -162,6 +182,6 @@ object PacketHandler : Listener {
         val listeningToPacket: KClass<*>,
         val method: KFunction<*>,
         val instance: Any,
-        val packetListener: PacketListener
+        val packetListener: PacketListener,
     )
 }
