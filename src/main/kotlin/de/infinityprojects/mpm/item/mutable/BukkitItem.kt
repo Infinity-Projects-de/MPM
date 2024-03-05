@@ -1,13 +1,12 @@
 package de.infinityprojects.mpm.item.mutable
 
-import de.infinityprojects.mpm.item.MutableItem
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 
-class BukkitMutableItem(private val itemStack: ItemStack): MutableItem {
+class BukkitItem(private val itemStack: ItemStack) : MutableItem {
     private val itemMeta: ItemMeta
         get() = itemStack.itemMeta ?: Bukkit.getItemFactory().getItemMeta(itemStack.type)
 
@@ -50,7 +49,10 @@ class BukkitMutableItem(private val itemStack: ItemStack): MutableItem {
         itemStack.addEnchantments(enchantments)
     }
 
-    override fun addEnchantment(enchantment: Enchantment, level: Int) {
+    override fun addEnchantment(
+        enchantment: Enchantment,
+        level: Int,
+    ) {
         itemStack.addEnchantment(enchantment, level)
     }
 
