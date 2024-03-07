@@ -59,10 +59,20 @@ class BlockHandler(val mpm: Main) {
             if (player.gameMode == GameMode.CREATIVE) {
                 destroyBlock(player.world, Position(pos.x, pos.y, pos.z), false)
             } else {
-                // increment status every x ticks calc
+                val block = Region.getBlockAt(player.world, pos.x, pos.y, pos.z)
+                if (block != null) {
+                    BreakHandler.startBreaking(
+                        player,
+                        Location(player.world, pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble()),
+                        Region.getBlockAt(player.world, Position(pos.x, pos.y, pos.z)) as BlockProvider,
+                        player.inventory.itemInMainHand,
+                    )
+                }
             }
-        } else if (p.action == ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK) {
-            // remove from destruction and send 0 status
+        } else if (p.action == ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK ||
+            p.action == ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK
+        ) {
+            BreakHandler.stopBreaking(player)
         } else {
             return
         }

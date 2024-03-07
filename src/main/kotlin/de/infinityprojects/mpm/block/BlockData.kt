@@ -70,7 +70,7 @@ class BlockData(
         item: ItemStack,
         player: Player,
     ): Float {
-        val mutableItem = MutableItem.fromItemStack(item)
+        val mutableItem = if (!item.type.isAir) MutableItem.fromItemStack(item) else null
 
         // BEST TOOL: Tool affects block but tier is not necessarily enough
         val bestTool: Boolean
@@ -80,7 +80,7 @@ class BlockData(
 
         var speedMultiplier = 1f
 
-        when (mutableItem) { // where item is mpm item (not yet implemented)
+        when (mutableItem) {
             is BukkitItem -> {
                 canHarvest = (isToolTypeCorrect(item) && isLevelCorrect(item)) || !isToolRequired()
                 bestTool = isToolTypeCorrect(item)
