@@ -131,11 +131,13 @@ class ItemHandler(val mpm: Main) {
                         } else {
                             Manager.getManager().getBlockRegistry().get(it)
                         }
-                    val itemStack = mItem.getItem(bukkitItem.amount)
-                    bukkitItem.type = itemStack.type
-                    bukkitItem.itemMeta = itemStack.itemMeta
+                    if (mItem != null) {
+                        val itemStack = mItem.getItem(bukkitItem.amount)
+                        bukkitItem.type = itemStack.type
+                        bukkitItem.itemMeta = itemStack.itemMeta
 
-                    return getRealItem(item)
+                        return getRealItem(item)
+                    }
                 }
             }
 

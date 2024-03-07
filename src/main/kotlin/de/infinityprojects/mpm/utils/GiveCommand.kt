@@ -71,7 +71,11 @@ class GiveCommand() : TabExecutor {
 
             val plugin = Bukkit.getPluginManager().getPlugin(args[1]) ?: return false
             val item = registry.get(plugin, args[2])
-            player.inventory.addItem(item.getItem())
+            if (item != null) {
+                player.inventory.addItem(item.getItem())
+            } else {
+                player.sendMessage("§4Item not found")
+            }
             return true
         }
         return false

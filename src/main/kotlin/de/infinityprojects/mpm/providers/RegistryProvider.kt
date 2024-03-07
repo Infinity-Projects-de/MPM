@@ -23,17 +23,14 @@ class RegistryProvider<T>(t: Class<T>, startingID: Int, val maxID: Int = Int.MAX
     override fun get(
         plugin: Plugin,
         name: String,
-    ): T {
+    ): T? {
         val key = NamespacedKey(plugin, name)
         return get(key)
     }
 
-    override fun get(key: NamespacedKey): T {
+    override fun get(key: NamespacedKey): T? {
         val t = register[key]
-        if (t != null) {
-            return t
-        }
-        throw IllegalArgumentException("Registry does not contain key")
+        return t
     }
 
     override fun getAll(plugin: Plugin): Map<NamespacedKey, T> {

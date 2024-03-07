@@ -12,12 +12,12 @@ interface Registry<T> {
         t: T,
     )
 
-    fun get(key: NamespacedKey): T
+    fun get(key: NamespacedKey): T?
 
     fun get(
         plugin: Plugin,
         name: String,
-    ): T
+    ): T?
 
     fun getAll(plugin: Plugin): Map<NamespacedKey, T>
 

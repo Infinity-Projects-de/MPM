@@ -63,17 +63,17 @@ interface MutableItem {
 
             if (predicates.isNotEmpty()) {
                 val predicate = predicates.first()
-                try {
-                    val mpm =
-                        when (predicate.second) {
-                            "mpm-item" -> Manager.getManager().getItemRegistry().get(predicate.first)
-                            "mpm-block" -> Manager.getManager().getBlockRegistry().get(predicate.first)
-                            else -> throw IllegalArgumentException("Unknown mpm type: ${predicate.second}")
-                        }
+                val mpm =
+                    when (predicate.second) {
+                        "mpm-item" -> Manager.getManager().getItemRegistry().get(predicate.first)
+                        "mpm-block" -> Manager.getManager().getBlockRegistry().get(predicate.first)
+                        else -> throw IllegalArgumentException("Unknown mpm type: ${predicate.second}")
+                    }
 
+                if (mpm != null) {
                     return MPMItem(item, mpm)
-                } catch (e: Exception) {
-                    Bukkit.getLogger().warning("Error while getting MPMItem: ${e.message}")
+                } else {
+                    Bukkit.getLogger().warning("Error while getting MPMItem: ${predicate.first}")
                     return BukkitItem(item)
                 }
             } else {

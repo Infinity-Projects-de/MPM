@@ -34,7 +34,9 @@ class Region(
             val namespacedKey = NamespacedKey(plugin, key)
 
             val block = Manager.getManager().getBlockRegistry().get(namespacedKey)
-            blocks[Position(x, y, z)] = block
+            if (block != null) {
+                blocks[Position(x, y, z)] = block
+            }
         }
     }
 
