@@ -98,6 +98,7 @@ object PacketHandler : Listener {
     private fun injectPlayer(player: Player) {
         val channelDuplexHandler: ChannelDuplexHandler =
             object : ChannelDuplexHandler() {
+                // Serverbound
                 override fun channelRead(
                     ctx: ChannelHandlerContext,
                     msg: Any,
@@ -110,6 +111,7 @@ object PacketHandler : Listener {
                     }
                 }
 
+                // Clientbound
                 override fun write(
                     ctx: ChannelHandlerContext?,
                     msg: Any?,
@@ -164,7 +166,7 @@ object PacketHandler : Listener {
             return packetEvent
         }
         return null
-    }
+    } // TODO: Bundle packets are sent as so, it might be good to create a BundledPacket handler
 
     // Lifecycle methods
 
