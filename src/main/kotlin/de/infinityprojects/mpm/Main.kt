@@ -7,6 +7,7 @@ import de.infinityprojects.mpm.block.Block
 import de.infinityprojects.mpm.block.handler.BlockHandler
 import de.infinityprojects.mpm.block.handler.BlockProvider
 import de.infinityprojects.mpm.block.handler.BlockRenderer
+import de.infinityprojects.mpm.block.handler.BreakHandler
 import de.infinityprojects.mpm.block.handler.NoteblockDisabler
 import de.infinityprojects.mpm.block.handler.PlaceListener
 import de.infinityprojects.mpm.block.storage.Region
@@ -41,6 +42,9 @@ class Main : JavaPlugin() {
         if (ItemProvider.MATERIAL.isBlock || BlockProvider.MATERIAL.isBlock) {
             throw IllegalArgumentException("Material cannot be a block for providers")
         }
+        if (ItemProvider.MATERIAL == BlockProvider.MATERIAL) {
+            throw IllegalArgumentException("Material cannot be the same for providers")
+        }
 
         server.servicesManager.register(Manager::class.java, manager, this, ServicePriority.Normal)
 
@@ -50,7 +54,7 @@ class Main : JavaPlugin() {
         command?.tabCompleter = c
 
         registerListener(PacketHandler)
-        PacketHandler.registerListeners(ItemHandler())
+        PacketHandler.registerListeners(ItemHandler(this))
         PacketHandler.registerListeners(BlockHandler(this))
         registerListener(PlaceListener())
         registerListener(BlockRenderer())
@@ -61,6 +65,8 @@ class Main : JavaPlugin() {
         Block.registerBlock(this, "aether_dirt", null, false)
         Block.registerBlock(this, "aether_grass_block", null, true)
         // END Test methods
+
+        BreakHandler(this)
 
         Bukkit.getScheduler().runTaskLater(
             this,
@@ -114,13 +120,18 @@ class Main : JavaPlugin() {
             variants.add(it.model.variantName, it.getVariant())
         }
 
-        val blockMaterial = BlockProvider.MATERIAL.name.lowercase()
+        val itemMaterial = BlockProvider.MATERIAL.name.lowercase()
 
         val overrideJson = JsonObject()
-        overrideJson.addProperty("parent", "minecraft:item/$blockMaterial")
+        overrideJson.addProperty("parent", "minecraft:item/handheld")
+
+        val textures = JsonObject()
+        textures.addProperty("layer0", "minecraft:item/$itemMaterial")
+        overrideJson.add("textures", textures)
+
         overrideJson.add("overrides", overrides)
 
-        zip.writeData(overrideJson, "assets/minecraft/models/item/$blockMaterial.json")
+        zip.writeData(overrideJson, "assets/minecraft/models/item/$itemMaterial.json")
 
         val variantJson = JsonObject()
         variantJson.add("variants", variants)
@@ -153,7 +164,12 @@ class Main : JavaPlugin() {
         val itemMaterial = ItemProvider.MATERIAL.name.lowercase()
 
         val overrideJson = JsonObject()
-        overrideJson.addProperty("parent", "minecraft:item/$itemMaterial")
+        overrideJson.addProperty("parent", "minecraft:item/handheld")
+
+        val textures = JsonObject()
+        textures.addProperty("layer0", "minecraft:item/$itemMaterial")
+        overrideJson.add("textures", textures)
+
         overrideJson.add("overrides", overrides)
 
         zip.writeData(overrideJson, "assets/minecraft/models/item/$itemMaterial.json")
