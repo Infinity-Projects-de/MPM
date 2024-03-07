@@ -47,6 +47,8 @@ class PlaceListener : Listener {
                     mpmItem.setBlock(block.location)
                     e.player.world.playSound(block.location, Sound.BLOCK_STONE_PLACE, 1.0f, 1.0f)
                 }
+
+                e.player.inventory.itemInMainHand.amount -= 1
                 e.isCancelled = true
             }
         }
