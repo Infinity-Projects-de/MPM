@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.Damageable
 import org.bukkit.inventory.meta.ItemMeta
 
 class BukkitItem(private val itemStack: ItemStack) : MutableItem {
@@ -66,6 +67,20 @@ class BukkitItem(private val itemStack: ItemStack) : MutableItem {
 
     override fun removeEnchantments() {
         itemStack.removeEnchantments()
+    }
+
+    override fun getEnchantmentLevel(enchantment: Enchantment): Int {
+        return itemStack.getEnchantmentLevel(enchantment)
+    }
+
+    override fun doUseDamage() {
+        if (canDoUseDamage()) {
+            val meta = itemMeta
+            if (meta is Damageable) {
+                meta.damage += 1
+                itemStack.itemMeta = meta
+            }
+        }
     }
 
     fun applyMeta() {
