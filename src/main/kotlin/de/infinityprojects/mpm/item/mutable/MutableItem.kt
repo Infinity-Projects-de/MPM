@@ -46,8 +46,6 @@ interface MutableItem {
 
     fun doUseDamage()
 
-
-
     companion object {
         fun fromItemStack(item: ItemStack): MutableItem {
             if (item.type.isAir) {
