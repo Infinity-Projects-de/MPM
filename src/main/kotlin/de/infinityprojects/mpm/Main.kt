@@ -61,7 +61,7 @@ class Main : JavaPlugin() {
         registerListener(NoteblockDisabler())
 
         // Test methods not MPM
-        Item.registerItem(this, "portal", null)
+        Item.registerItem(this, "aether_stick", null)
         Block.registerBlock(this, "aether_dirt", null, false)
         Block.registerBlock(this, "aether_grass_block", null, true)
         // END Test methods
