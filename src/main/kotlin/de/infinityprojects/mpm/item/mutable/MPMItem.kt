@@ -115,11 +115,12 @@ class MPMItem(val itemStack: ItemStack, val item: Item) : MutableItem {
     override fun getEnchantments(): Map<Enchantment, Int> {
         val enchantments = getEnchantmentContainer()
         val reg = Registry.ENCHANTMENT
-        val ench = enchantments.keys.mapNotNull {
-            val enchantment = reg.get(it) ?: return@mapNotNull null
-            val level = enchantments.get(it, PersistentDataType.INTEGER) ?: return@mapNotNull null
-            enchantment to level
-        }.toMap()
+        val ench =
+            enchantments.keys.mapNotNull {
+                val enchantment = reg.get(it) ?: return@mapNotNull null
+                val level = enchantments.get(it, PersistentDataType.INTEGER) ?: return@mapNotNull null
+                enchantment to level
+            }.toMap()
         return ench
     }
 
