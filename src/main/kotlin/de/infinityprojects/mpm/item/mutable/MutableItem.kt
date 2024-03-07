@@ -7,6 +7,7 @@ import org.bukkit.Bukkit
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
+import kotlin.random.Random
 
 interface MutableItem {
     fun getAmount(): Int
@@ -35,6 +36,17 @@ interface MutableItem {
     fun hasEnchantment(enchantment: Enchantment): Boolean
 
     fun removeEnchantments()
+
+    fun getEnchantmentLevel(enchantment: Enchantment): Int
+
+    fun canDoUseDamage(): Boolean {
+        val durabilityLvl = getEnchantmentLevel(Enchantment.DURABILITY)
+        return Random.nextInt(0, durabilityLvl + 1) == 0
+    }
+
+    fun doUseDamage()
+
+
 
     companion object {
         fun fromItemStack(item: ItemStack): MutableItem {
